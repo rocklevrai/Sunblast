@@ -49,9 +49,10 @@
     background:linear-gradient(180deg,#ff6ab0,#ff2a7a);box-shadow:0 6px 0 #b0104a,0 10px 18px rgba(0,40,120,.4);touch-action:manipulation;
     text-shadow:0 2px 0 #b0104a}
   .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b0104a}
-  #grid{display:grid;grid-template-columns:repeat(5,52px);gap:8px;margin-top:18px}
-  #grid button{font:inherit;font-size:22px;height:52px;border-radius:14px;border:3px solid #fff;color:#fff;padding-top:4px;
-    background:linear-gradient(180deg,#3ad0ff,#0a8ae0);box-shadow:0 4px 0 #0a5aa0;touch-action:manipulation}
+  #grid{display:grid;grid-template-columns:repeat(8,36px);gap:6px;margin-top:16px}
+  #grid button{font:inherit;font-size:16px;height:36px;border-radius:10px;border:2px solid #fff;color:#fff;padding:3px 0 0;
+    background:linear-gradient(180deg,#3ad0ff,#0a8ae0);box-shadow:0 3px 0 #0a5aa0;touch-action:manipulation}
+  @media (max-height:700px){#title .small{display:none}}
   #grid button[disabled]{background:rgba(0,60,140,.45);box-shadow:none;border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.45)}
   #clear{display:none}
   #err{position:fixed;left:10px;right:10px;bottom:10px;color:#a00;font:12px monospace;pointer-events:none;white-space:pre-wrap}
@@ -292,7 +293,7 @@ class Builder{
   rock(R,o={}){const p=this._pre(2*R,o);const h=p.top-WATER+2;const m=mesh(G.hex,mat.rock,R*1.08,h,R*1.08);m.rotation.y=rnd()*3;add(m,p.x,p.top-h/2,p.cz,levelG);
     const cap=mesh(G.cyl,mat.sand,R*.8,.08,R*.8);add(cap,p.x,p.top+.01,p.cz,levelG);
     const c={t:'cyl',x:p.x,z:p.cz,R,top:p.top,bot:WATER-2};colliders.push(c);route.push(c);return this}
-  box(kind,w,d,o={}){const mv=o.move,az=mv&&mv.ax==='z'?mv.amp:0,p=this._pre(d,o,az);const g=new THREE.Group();let hh=.4;this.k++;
+  box(kind,w,d,o={}){const mv=o.move,az=mv&&(mv.ax==='z'||mv.ax==='c')?mv.amp:0,p=this._pre(d,o,az);const g=new THREE.Group();let hh=.4;this.k++;
     if(kind==='dock'){g.add(mesh(G.box,mat.wood,w,hh,d));post(p.x-w/2+.3,p.top-.2,p.cz-d/2+.4);post(p.x+w/2-.3,p.top-.2,p.cz+d/2-.4)}
     else if(kind==='raft'){hh=.55;g.add(mesh(G.box,raftMat[this.k%4],w,hh,d));[-1,1].forEach(k=>{const t=mesh(G.cyl,raftMat[(this.k+1)%4],.3,d,.3);t.rotation.x=Math.PI/2;t.position.set(k*w/2,0,0);g.add(t)})}
     else if(kind==='board'){hh=.28;g.add(mesh(G.sph,boardMat[this.k%4],w*.64,hh/2,d*.62))}
@@ -306,6 +307,12 @@ class Builder{
   bounce(o={}){const R=1.5,p=this._pre(2*R,o);const g=new THREE.Group();const c=mesh(G.cone,this.k++%2?mat.umb:mat.umb2,R*1.12,.7,R*1.12);c.position.y=-.35;g.add(c);
     const kn=mesh(G.sph,mat.white,.14,.14,.14);g.add(kn);add(g,p.x,p.top,p.cz,levelG);const h=p.top-WATER+.4;const pl=mesh(G.cyl,mat.pole,.09,h,.09);add(pl,p.x,p.top-.5-h/2,p.cz,levelG);
     const col={t:'cyl',x:p.x,z:p.cz,R,top:p.top,bot:p.top-.7,bounce:1,mesh:g,sq:0};colliders.push(col);route.push(col);pads.push(col);return this}
+  floatie(o={}){const R=1.3,hh=.5,p=this._pre(2*R,o);const g=new THREE.Group();g.add(mesh(G.sph,raftMat[this.k++%4],R*1.05,.32,R*1.05));
+    const kn=mesh(G.sph,mat.white,.3,.2,.3);kn.position.y=.2;g.add(kn);add(g,p.x,p.top-hh/2,p.cz,levelG);
+    const c={t:'cyl',x:p.x,z:p.cz,R,top:p.top,bot:p.top-hh,hh,mesh:g,bx:p.x,by:p.top,bz:p.cz,dx:0,dy:0,dz:0,move:{ax:'s'},tt:0,trig:0};colliders.push(c);route.push(c);movers.push(c);return this}
+  ball(o={}){const R=1,p=this._pre(2*R,o);const g=new THREE.Group();const b=mesh(G.sph,mat.ball,R,R,R);b.position.y=-R;b.rotation.set(rnd()*3,0,rnd()*3);g.add(b);add(g,p.x,p.top,p.cz,levelG);
+    const h=p.top-2-WATER+.4;if(h>.3){const pl=mesh(G.cyl,mat.pole,.07,h,.07);add(pl,p.x,p.top-2-h/2,p.cz,levelG)}
+    const col={t:'cyl',x:p.x,z:p.cz,R,top:p.top,bot:p.top-1.7,bounce:1,vb:11,mesh:g,sq:0};colliders.push(col);route.push(col);pads.push(col);return this}
   goal(R,o={}){this.isl(R,o);const c=route[route.length-1],gx=c.x,gz=c.z-R*.25,top=c.top;const g=new THREE.Group();
     [-1,1].forEach(k=>{const p=mesh(G.cyl,mat.trunk,.26,3.4,.26);p.position.set(k*1.7,1.7,0);g.add(p)});
     const rf=mesh(G.cone4,mat.thatch,3.1,1.5,3.1);rf.rotation.y=Math.PI/4;rf.position.y=4.1;g.add(rf);
@@ -342,11 +349,36 @@ const LEVELS=[
    .isl(3,{gap:2.6,dy:-.5,cp:1}).raft(2.4,{gap:2.3,move:mx(3,1.5)}).lift(2.4,3,1.3,{gap:2.2,star:1}).bounce({gap:2.2}).dock(2.6,3.5,{gap:3.2,dy:4}).rock(1,{gap:2.8,dx:2,dy:.5,star:1})
    .rock(1,{gap:2.8,dx:-2,dy:.5}).board({gap:2.3,dy:.3,move:mx(2.5,1.5),star:1}).goal(6.5,{gap:2.5,dy:-1})}
 ];
+function gen(b,i){const d=(i-10)/29,n=Math.round(14+12*d);let since=0,prev='s';
+  const sp=()=>rr(.9,1.1)+.6*d,sg=()=>rnd()<.5?-1:1,star=()=>rnd()<.4?1:0;
+  const dxs=()=>{let v=rr(-2,2);if(b.x>4)v=-Math.abs(v);if(b.x<-4)v=Math.abs(v);return v};
+  const dys=()=>{if(b.y>8)return -rr(.8,1.6);const v=rr(-.5,.9);return b.y+v<0?.3:v};
+  const stat=()=>{const o={gap:rr(2.1,2.5+.9*d),dx:dxs(),dy:dys(),star:star()},k=rnd();
+    if(k<.4)b.dock(rr(2.6,3)-.6*d,rr(2.8,3.6),o);else if(k<.7)b.rock(rr(1.15,1.4)-.2*d,o);else b.crate(rr(1.8,2.1),o);prev='s'};
+  for(let k=0;k<n;k++){
+    if(prev==='p'){b.dock(2.6,rr(3,3.6),{gap:rr(3,3.2),dy:rr(3.5,4),star:star()});prev='s';continue}
+    if(since>=7){b.isl(rr(3,3.4),{gap:rr(2,2.5),dy:b.y>1?-.5:0,cp:1,star:star()});since=0;prev='s';continue}
+    since++;const r=rnd();
+    if(prev==='f'||prev==='b'||r<.28){stat();continue}
+    if(r<.40){b.raft(rr(2.4,2.9),{gap:rr(1.9,2.3),move:mx(rr(2.5,3.2),sp()*sg()),star:star()});prev='m'}
+    else if(r<.50){b.board({gap:rr(1.5,1.9),move:mz(rr(2,2.8),sp()),star:star()});prev='m'}
+    else if(r<.58){b.board({gap:rr(2,2.3),move:mx(rr(2.5,3),sp()*sg()),star:star()});prev='m'}
+    else if(r<.68){b.lift(rr(2.4,2.8),rr(2.5,3.8),sp(),{gap:rr(1.9,2.2),star:star()});prev='m'}
+    else if(r<.76){b.raft(2.6,{gap:1.8,move:{ax:'c',amp:rr(2.2,2.8),sp:sp()*.8*sg()},star:star()});prev='m'}
+    else if(r<.86&&i>=12){const c=1+Math.floor(rnd()*3);for(let j=0;j<c;j++)b.floatie({gap:rr(2,2.5),dx:dxs()*.7,star:j===0&&star()});prev='f'}
+    else if(r<.94&&i>=14){const c=2+Math.floor(rnd()*3);for(let j=0;j<c;j++)b.ball({gap:rr(2.2,3),dx:dxs()*.6,star:j===1&&star()});prev='b'}
+    else if(r>=.94){b.bounce({gap:rr(2,2.2)});prev='p'}
+    else stat()}
+  if(prev==='p')b.dock(2.6,3.4,{gap:3.1,dy:3.8});
+  b.goal(i===39?6.5:5,{gap:2.5,dy:b.y>1?-1:0})}
+const SEEDS=[1000, 1316, 1026, 1039, 3701, 1065, 1179, 1091, 3900, 3952, 1130, 4050, 4104, 4151, 4200, 4251, 4301, 4350, 1234, 4450, 1563, 4551, 4600, 1501, 1514, 4751, 4822, 1654, 4902, 4965];
+"Coral Coast|Pelican Pier|Floatie Frenzy|Mango Marina|Beach Ball Bay|Tiki Trail|Clam Canyon|Hula Heights|Riptide Run|Kahuna's Cousin|Flamingo Flats|Sandcastle Sprint|Dolphin Dash|Parasol Peaks|Lagoon Loop|Starfish Steps|Banana Boat Blitz|Surfboard Shuffle|Typhoon Twist|Shark Fin Shoals|Pineapple Plunge|Sunburn Summit|Wipeout Way|Castaway Climb|Jellyfish Jump|Monsoon Mile|Volcano View|Tsunami Trial|Last Resort|Endless Summer".split('|').forEach((n,k)=>LEVELS.push({n,seed:SEEDS[k]||1000+k*13,b:(b,i)=>gen(b,i)}));
+const TINT=[0xffffff,0xc4ffe0,0xd4e2ff,0xffe6f6];
 let LI=0,unlocked=1;try{unlocked=clamp(parseInt(localStorage.getItem('sunsplash_unlocked'))||1,1,LEVELS.length)}catch(e){}
 function buildLevel(i){
   levelG.traverse(o=>{if(o.geometry&&!o.geometry.userData.shared)o.geometry.dispose()});scene.remove(levelG);levelG=new THREE.Group();scene.add(levelG);
-  colliders=[];movers=[];pickups=[];checkpoints=[];route=[];pads=[];spinners=[];goal=null;LI=i;seed=101+i*7919;
-  LEVELS[i].b(new Builder().start(5));
+  colliders=[];movers=[];pickups=[];checkpoints=[];route=[];pads=[];spinners=[];goal=null;LI=i;seed=LEVELS[i].seed||101+i*7919;water.material.color.setHex(TINT[Math.floor(i/10)]);
+  LEVELS[i].b(new Builder().start(5),i);
   if(i===LEVELS.length-1){const c=goal.isle;[[-4,1],[4,1],[-3,-4],[3,-4]].forEach(q=>umbrella(c.x+q[0],c.top,c.z+q[1],levelG,q[0]<0?mat.umb:mat.umb2))}
 }
 
@@ -355,13 +387,16 @@ const P={x:0,y:0,z:1.5,vx:0,vy:0,vz:0,yaw:0,pitch:-.02,ground:null,coyote:0,jbuf
 const PR=.35,PH=1.7,EYE=1.55,SPEED=6.6,JUMP=9.6,GRAV=24,BOUNCE=16;
 let state='title',time=0,runT=0,got=0,falls=0,totalT=0;
 const inp={mx:0,my:0,jump:false};
+function mvOff(m,t){const v=Math.sin(t*m.sp)*m.amp;return m.ax==='x'?[v,0,0]:m.ax==='y'?[0,v+(m.off||0),0]:m.ax==='z'?[0,0,v]:[Math.cos(t*m.sp)*m.amp,0,v]}
 function overXZ(c,x,z,r){return c.t==='cyl'?Math.hypot(x-c.x,z-c.z)<c.R+r:(Math.abs(x-c.x)<c.w/2+r&&Math.abs(z-c.z)<c.d/2+r)}
 function place(c){P.x=c.x;P.y=c.y+.05;P.z=c.z;P.vx=P.vy=P.vz=0;P.yaw=0;P.pitch=-.02;P.ground=null}
 function respawn(){falls++;place(checkpoints[P.cp]);
   $('flash').style.transition='none';$('flash').style.opacity=.85;requestAnimationFrame(()=>{$('flash').style.transition='opacity .6s';$('flash').style.opacity=0});sfx.splash()}
 function physics(dt){
-  for(const m of movers){const v=Math.sin(time*m.move.sp)*m.move.amp+(m.move.off||0);let nx=m.bx,ny=m.by,nz=m.bz;
-    if(m.move.ax==='x')nx+=v;else if(m.move.ax==='y')ny+=v;else nz+=v;
+  for(const m of movers){let nx=m.bx,ny=m.by,nz=m.bz;
+    if(m.move.ax==='s'){if(P.ground===m)m.trig=1;if(m.trig){m.tt+=dt;if(m.tt>.6)ny-=(m.tt-.6)*5;if(m.tt>3.4){m.trig=0;m.tt=0}}
+      m.mesh.rotation.z=m.trig&&m.tt<.6?Math.sin(time*45)*.09:0}
+    else{const o=mvOff(m.move,time);nx+=o[0];ny+=o[1];nz+=o[2]}
     m.dx=nx-m.x;m.dy=ny-m.top;m.dz=nz-m.z;m.x=nx;m.z=nz;m.top=ny;m.bot=ny-m.hh;m.mesh.position.set(nx,ny-m.hh/2,nz)}
   if(P.ground&&P.ground.move){P.x+=P.ground.dx;P.z+=P.ground.dz;P.y=P.ground.top}
   let ix=inp.mx,iy=inp.my;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;if(keys.KeyW||keys.ArrowUp)iy-=1;if(keys.KeyS||keys.ArrowDown)iy+=1;
@@ -378,7 +413,7 @@ function physics(dt){
   const wasAir=!P.ground,vy0=P.vy;P.vy-=GRAV*dt;if(P.vy<-40)P.vy=-40;let ny=P.y+P.vy*dt;P.ground=null;
   for(const o of colliders){if(!overXZ(o,P.x,P.z,o.t==='cyl'?0:PR*.5))continue;
     if(P.vy<=0&&P.y>=o.top-.25&&ny<=o.top+.001){ny=o.top;
-      if(o.bounce){P.vy=BOUNCE;o.sq=1;P.pad=o;P.coyote=0;sfx.boing()}else{P.vy=0;P.ground=o}}
+      if(o.bounce){P.vy=o.vb||BOUNCE;o.sq=1;P.pad=o;P.coyote=0;sfx.boing()}else{P.vy=0;P.ground=o}}
     else if(P.vy>0&&P.y+PH<=o.bot+.05&&ny+PH>o.bot){ny=o.bot-PH;P.vy=0}}
   P.y=ny;
   if(P.ground){if(wasAir&&vy0<-6){P.dip=Math.min(.35,-vy0*.02);sfx.land()}
@@ -479,8 +514,8 @@ function botStep(){const g=P.ground;if(g){const i=route.indexOf(g);if(i>=0)botI=
   inp.jump=false;inp.mx=0;inp.my=-1;
   if(botI>=route.length-1){P.yaw=Math.atan2(-(goal.x-P.x),-(goal.z-P.z));return}
   const t0=route[botI+1];let t=t0;
-  if(t0.move&&t0.move.ax!=='y'){const m=t0.move,lead=g?.5:Math.max(0,(P.vy+Math.sqrt(Math.max(0,P.vy*P.vy+2*GRAV*(P.y-t0.top))))/GRAV),o=Math.sin((time+lead)*m.sp)*m.amp-Math.sin(time*m.sp)*m.amp;
-    t=Object.assign({},t0);if(m.ax==='x')t.x+=o;else t.z+=o}
+  if(t0.move&&t0.move.ax!=='y'&&t0.move.ax!=='s'){const m=t0.move,lead=g?.5:Math.max(0,(P.vy+Math.sqrt(Math.max(0,P.vy*P.vy+2*GRAV*(P.y-t0.top))))/GRAV),a=mvOff(m,time+lead),b0=mvOff(m,time);
+    t=Object.assign({},t0);t.x+=a[0]-b0[0];t.z+=a[2]-b0[2]}
   const a=nearest(t,P.x,P.z,.6),dx=a[0]-P.x,dz=a[1]-P.z,dl=Math.hypot(dx,dz)||1e-4;P.yaw=Math.atan2(-dx,-dz);
   if(g){const e=nearest(t,P.x,P.z,0),de=Math.hypot(e[0]-P.x,e[1]-P.z),dy=t0.top-P.y,range=dy>1.35?-1:dy>.35?3.5:4;
     if(!overXZ(g,P.x+dx/dl*.3,P.z+dz/dl*.3,-.05)){if(de<=range)inp.jump=true;else inp.my=0}}
@@ -512,7 +547,7 @@ function frame(now){requestAnimationFrame(frame);
   renderer.render(scene,camera);
 }
 buildLevel(0);mkGrid();
-window.__g={P,startLevel,botRun,get state(){return state},LEVELS};
+window.__g={P,startLevel,botRun,setSeed:(i,s)=>{LEVELS[i].seed=s},get state(){return state},LEVELS};
 requestAnimationFrame(frame);
 </script>
 </body>
